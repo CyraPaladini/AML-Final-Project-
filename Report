@@ -1,0 +1,77 @@
+
+Public health decision-makers often struggle to allocate limited resources to communities that need them most, particularly during disease outbreaks. In this project, I explore whether household characteristics and svi can be used to predict which U.S. counties are most vulnerable to disease spread, using COVID-19 as a case study.
+My goal was to generate a vulnerability score based on social volatility, healthcare access, and demographic factors, and use that score to identify the top 100 counties that may benefit from early intervention during future public health crises. The project uses county-level data from multiple sources and trains a supervised machine learning model (rf) to predict COVID-19 case rates as a proxy for disease vulnerability.
+The intended audience includes local and state public health agencies, as well as federal institutions such as the CDC. 
+
+This project is an adaptation of the example project from Homework 5. The original project clustered US counties based on changes in household composition, but their analysis did not assist in any potential real world decision making. I attempted to replicate and enhance this project by using the original data, i.e. household info and svi characteristics, to attempt to predict countied that a public health organization/nonprofit ought to prioritize for disease prevention programs. 
+The central question around my interperetation was: which U.S. counties should a public health agency prioritize for disease prevention programs?
+
+2. Data Sources
+This project integrates three publicly available datasets:
+  curve_feats_counties.csv: Features extracted from mobility and household structure trends, including changes in the number of married and unmarried households from 2021 to 2022. Source: internal aggregation of census/mobility data.
+SVI_2020_US_county.csv: The CDC Social Vulnerability Index, with indicators like poverty, minority percentage, vehicle access, and crowded housing. Source: CDC.
+covid_confirmed_usafacts.csv: Cumulative confirmed COVID-19 cases by county. Source: USAFacts.
+After cleaning, merging, and transforming, the final dataset includes 3,100+ counties and the following variables:
+    Married and unmarried household slope (year-over-year changes)
+    Derived features: household_volatility, healthcare_vulnerability, disease_risk_score
+    SVI indicators: poverty, uninsured rate, minority %, seniors (65+), vehicle access
+    COVID cases (raw and per 100k population) 
+    
+3. Feature Engineering
+Three features were engineered to enhance predictive value:
+  Household Volatility: Combined absolute change in married and unmarried households to capture social instability.
+  Healthcare Vulnerability: Sum of uninsured individuals and crowded housing counts.
+  Disease Risk Score: A weighted score: 0.4 * household_volatility + 0.6 * healthcare_vulnerability. This score was originally used to rank counties.
+  However, upon reading the variable importance plot, disease risk score was re-engineered to 
+These features were selected based on theoretical relevance to disease vulnerability and observed variability across counties.
+
+4. Exploratory Data Analysis
+Initial exploration included:
+  Visualizing distributions of features (e.g., histogram of married.slope_2022)
+  Identifying outliers (e.g., Los Angeles County, which was removed due to extreme values)
+  Checking for and imputing missing values using median imputation
+  Standardizing and harmonizing county identifiers for merging - FIPS
+  Basic sanity checks were performed, such as ensuring population figures matched expectations and COVID cases per 100k fell within plausible ranges.
+
+
+5. Modeling 
+Random Forest regression
+Target Variable: covid_cases_per_100k
+dumb baseline: Mean prediction (i.e., predicting the average COVID case rate)
+The dataset was split 80/20 into training and testing sets. A random forest was trained using 5-fold cross-validation. The model was compared to the baseline using RMSE (Root Mean Square Error).
+
+6. Results and Evaluation
+Unfortunately, the random forest model underperformed the baseline, indicating that our engineered features did not provide sufficient predictive power for COVID-19 case rates across counties.
+However, feature importance analysis revealed: poverty, age, and lack of insurance were the top 3 predictors, to the extent that the model did predict. 
+A plot of actual vs. predicted values showed significant spread, with no clear 1:1 correspondence.
+
+![image](/Users/cyra/Documents/Applied Machine Learning/Final Project/outputs/DALEX Var Importance.png)
+![image2](/Users/cyra/Documents/Applied Machine Learning/Final Project/outputs/Var Importance Plot.png)
+
+7. Interpretation and Limitations
+Despite feature engineering and re-engineering, the model's predictive power was limited. Several plausible reasons include:
+Omitted Variables: Behavioral, policy, and environmental factors (e.g., mask mandates, mobility, vaccination rates) are likely critical to COVID spread but were not included. 
+Time Factor: We used static snapshots, while the pandemic evolved dynamically. Time-series modeling might perform better.
+Essentially, COVID cases may be noisy due to underreporting and testing variation across counties.
+That said, our ranking approach (disease risk score) still provides a useful summary of vulnerability and can be useful for prioritization, even if absolute case prediction is challenging.
+
+Going fotward, I would not use COVID as a case study for this model, as it was a particular disease which was subject to anumber of political factors dissicult to account for. 
+Additionally, testing protocol and frequency, as well as reporting standards, varied widely across the united states, meaning that case counts could be wildly off. I would, in the future, pick a disease that a) isn't absolutely everywhere, and b) has more consistent standards for testing and reporting.  
+
+8. Conclusion and Next Steps
+We generated a list of the top 100 most vulnerable counties based on disease_risk_score. These counties, representing a blend of high volatility and healthcare access gaps, could be targeted for:
+Preventive outreach
+Mobile clinic deployments
+Communication campaigns during disease outbreaks
+This output aligns with the goal of building a filtering metric to support early, targeted intervention by health officials. 
+With adaptation to the model this would guide real world decision making for disease prevention programs aiming to target potential hotspots before serious outbreak. 
+This project shows that county-level social and healthcare features have limited power to predict COVID-19 case rates, but can still serve a valuable role in prioritizing public health efforts. 
+Future improvements might include:
+Incorporating behavioral and policy data
+Using time-series models or classification (e.g., high vs. low vulnerability)
+Adding spatial modeling techniques (e.g., geographically weighted regression)
+
+
+COVID data accessible from: https://usafacts.org/visualizations/coronavirus-covid-19-spread-map/
+Other data from original project, downloaded from courseworks or optionally generated from .py files. 
+
