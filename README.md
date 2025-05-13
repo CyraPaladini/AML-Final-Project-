@@ -1,1 +1,3 @@
 # AML-Final-Project-
+
+This project is an adaptation of Homework 5's example project that predicted county clusters based on household trends and social vulnerability index, which intends to make it less exploratory and more decision based. My project takes the same data obtained via CDC and ASTDR, and uses it to predict which counties will experience the greatest number of covid cases, based on the established relationship between social vulnerability and public health emergencies. The CDC says of SVI, "The CDC/ATSDR SVI databases and maps can help communities prepare for and recover from public health emergencies, and prevent adverse effects among socially vulnerable populations, such as emotional distress, loss of property, illness, and death." 
